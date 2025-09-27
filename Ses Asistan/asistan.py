@@ -7,13 +7,10 @@ import os
 import soundfile as sf
 import keyboard
 
-# Modelimizi bir kere yükleyelim ki her seferinde yüklenmesin.
-# "base" modeli hız ve doğruluk arasında iyi bir dengedir.
 print("Whisper modeli yükleniyor...")
 whisper_model = whisper.load_model("base")
 print("Whisper modeli yüklendi.")
 
-# Coqui TTS modelini yüklüyoruz. xtts_v2 modeli ses klonlama için harikadır.
 print("Coqui TTS modeli yükleniyor...")
 tts_model = TTS("tts_models/multilingual/multi-dataset/xtts_v2", gpu=True)
 print("Coqui TTS modeli yüklendi.")
@@ -26,8 +23,8 @@ def sesi_metne_cevir():
     """
     print(">>> Adım 1: Ses dinleniyor...")
 
-    fs = 44100  # Örnekleme frekansı
-    seconds = 3  # Kayıt süresi
+    fs = 44100
+    seconds = 3
     filename = "kayit.wav"
 
     print("Kaydediliyor...")
@@ -60,12 +57,10 @@ def ollama_ile_cevap_uret(metin):
         response = ollama.chat(
             model='llama3.1     ',
             messages=[
-                # YENİ, DAHA ANLAŞILIR VE NET SİSTEM TALİMATI
                 {
                     'role': 'system',
                     'content': 'Sadece Türkçe konuşuyorsun ve 1 cümle kuruyorsun.kısa öz ve kibar bir dille cevap ver.',
                 },
-                # KULLANICININ MESAJI
                 {
                     'role': 'user',
                     'content': metin,
@@ -97,7 +92,7 @@ def metni_sese_cevir_ve_oynat(metin):
         tts_model.tts_to_file(
             text=metin,
             speaker_wav=reference_voice_path,
-            language="tr",  # Dil olarak Türkçe'yi belirtiyoruz
+            language="tr",
             file_path=output_filename
         )
 
@@ -109,7 +104,6 @@ def metni_sese_cevir_ve_oynat(metin):
         sd.wait()
 
         print(">>> Sesli cevap oynatıldı.")
-
         # Geçici yanıt dosyasını sil
         os.remove(output_filename)
 
@@ -118,23 +112,15 @@ def metni_sese_cevir_ve_oynat(metin):
 
 
 def main():
-    """
-    Ana fonksiyon. Sürekli çalışır, 'space' tuşuna basılmasını bekler,
-    işlemi gerçekleştirir      ve tekrar beklemeye geçer. 'esc' tuşu ile çıkar.
-    """
     print("Asistan başlatıldı. Çıkmak için 'esc' tuşuna, konuşmak için 'space' tuşuna basın.")
 
     while True:
         try:
-            # Kullanıcının bir tuşa basmasını bekle
             print("\nDinleme moduna geçmek için 'space' tuşuna basın...")
             keyboard.wait('space')
 
             print("Tuşa basıldı, dinleniyor...")
-
-            # 1. Kullanıcının sesini metne çevir
             kullanici_komutu = sesi_metne_cevir()
-
             # Eğer kullanıcı bir şey söylemediyse döngünün başına dön
             if not kullanici_komutu.strip():
                 print("Bir şey söylemediğiniz için işlem iptal edildi.")
@@ -152,7 +138,6 @@ def main():
             break
         except Exception as e:
             # 'esc' tuşuna basıldığında keyboard.wait bir hata fırlatır,
-            # bunu kullanarak döngüden çıkabiliriz.
             if "esc" in str(e).lower():
                 print("\n'esc' tuşuna basıldı, program kapatılıyor.")
                 break
